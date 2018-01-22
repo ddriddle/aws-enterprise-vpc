@@ -9,6 +9,11 @@ terraform {
 
 ## Inputs
 
+variable "tags" {
+  description = "A mapping of tags to assign to the module's resource(s)"
+  default     = {}
+}
+
 variable "vpc_id" {}
 variable "name" {}
 variable "cidr_block" {}
@@ -60,9 +65,7 @@ data "aws_vpc" "vpc" {
 # create Subnet and associated Route Table
 
 resource "aws_subnet" "subnet" {
-  tags {
-    Name = "${var.name}"
-  }
+  tags = "${merge(map("Name", var.name), var.tags)}"
 
   availability_zone       = "${var.availability_zone}"
   cidr_block              = "${var.cidr_block}"
@@ -97,6 +100,8 @@ data "aws_vpc_peering_connection" "pcx" {
   # aws_route every single run even if nothing has changed.  Work around by
   # embedding the dependency within id instead.
   id = "${replace(var.pcx_ids[count.index],var.dummy_depends_on,var.dummy_depends_on)}"
+  # TODO can we do better?
+  tags = "${var.tags}"
 }
 
 resource "aws_route" "pcx" {
