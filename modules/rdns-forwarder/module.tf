@@ -158,6 +158,8 @@ resource "aws_security_group" "rdns" {
   name_prefix = "rdns-"
   vpc_id      = "${data.aws_vpc.selected.id}"
 
+  tags = "${var.tags}"
+
   lifecycle {
     create_before_destroy = true
   }

@@ -8,6 +8,11 @@ terraform {
 
 ## Inputs
 
+variable "tags" {
+  description = "A mapping of tags to assign to the module's resource(s)"
+  default     = {}
+}
+
 variable "name" {
   description = "tag:Name for this VPN Connection"
 }
@@ -86,9 +91,7 @@ data "aws_region" "current" {
 # VPN Connection
 
 resource "aws_vpn_connection" "vpn" {
-  tags {
-    Name = "${var.name}"
-  }
+  tags = "${merge(map("Name", var.name), var.tags)}"
 
   vpn_gateway_id      = "${var.vpn_gateway_id}"
   customer_gateway_id = "${var.customer_gateway_id}"

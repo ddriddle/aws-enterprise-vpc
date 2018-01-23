@@ -8,6 +8,11 @@ terraform {
 
 ## Inputs
 
+variable "tags" {
+  description = "A mapping of tags to assign to the module's resource(s)"
+  default     = {}
+}
+
 variable "vpc_id" {
   description = "VPC in which to create this subnet, e.g. vpc-abcd1234"
 }
@@ -75,7 +80,9 @@ output "cidr_block" {
 ## Resources
 
 module "subnet" {
-  source = "git::https://github.com/cites-illinois/aws-enterprise-vpc.git//modules/subnet-common?ref=v0.7"
+  # TODO - change this back before merging!
+  #  source = "git::https://github.com/cites-illinois/aws-enterprise-vpc.git//modules/subnet-common?ref=v0.7"
+  source = "git::https://github.com/ddriddle/aws-enterprise-vpc.git//modules/subnet-common?ref=feature/tags"
 
   vpc_id                  = "${var.vpc_id}"
   name                    = "${var.name}"
@@ -87,12 +94,12 @@ module "subnet" {
   endpoint_count          = "${var.endpoint_count}"
   map_public_ip_on_launch = true
   rtb_id                  = "${aws_route_table.rtb.id}"
+
+  tags = "${var.tags}"
 }
 
 resource "aws_route_table" "rtb" {
-  tags {
-    Name = "${var.name}-rtb"
-  }
+  tags = "${merge(map("Name", format("%s-rtb", var.name)), var.tags)}"
 
   vpc_id = "${var.vpc_id}"
 }
